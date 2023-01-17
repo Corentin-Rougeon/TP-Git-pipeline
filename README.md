@@ -130,3 +130,74 @@ class TestSimpleMath(unittest.TestCase):
 resultat push :
 ![img.png](screenshots/workflow_py_add_sub.png)
 
+### 5. Ajouter une étape de lint 
+
+`.github/workflows/pylin.yml`
+```yml
+name: Pylint
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+      - name: Analysing the code with pylint
+        run: |
+          find . -name '*.py' -exec pylint {} \;
+
+```
+
+resultat push :
+
+![img.png](screenshots/workflow_pylint.png)
+
+### 7. Ajouter une étape qui build un conteneur Docker embarquant votre application
+
+
+`dockerfile`
+
+```dockerfile
+FROM python:3.9
+
+WORKDIR /app
+
+COPY test_simplemath.py .
+COPY simplemath.py .
+
+CMD [ "python", "-m", "unittest", "test_simplemath.py" ]
+```
+
+
+`.github/workflows/docker-build.yml`
+
+```yml
+name: docker-build
+
+on: [push]
+
+jobs:
+
+build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build -f dockerfile -t actions .
+```
+
+resultat push :
+![img.png](screenshots/workflow_build.png)
